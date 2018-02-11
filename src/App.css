@@ -1,0 +1,44 @@
+.App {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.App-sidebar,
+.App-main {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.App-sidebar {
+  background-color: #333;
+  color: white;
+  padding: 16px;
+}
+
+.App-title {
+  font-size: 1.5em;
+  margin: 0;
+}
+
+.App-main {
+  width: 100%;
+}
+
+.App-line {
+  padding: 0 16px;
+}
+
+.App-line[data-active='true'] {
+  background-color: #f8f8f8;
+}
+
+.App-line pre {
+  margin: 0;
+}
