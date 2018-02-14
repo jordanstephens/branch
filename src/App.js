@@ -9,8 +9,6 @@ import { List, AutoSizer } from 'react-virtualized';
 import 'react-virtualized/styles.css'
 import './App.css';
 
-const LINE_HEIGHT = 16;
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -23,12 +21,21 @@ class App extends Component {
 
     this.state = {
       lines: code.split('\n'),
+      active: [0, 0],
       ast,
+      characterDimensions: [8, 16],
     };
   }
 
   componentDidMount() {
     this.list.addEventListener('mousemove', this.onMouseMove);
+    const styles = window.getComputedStyle(this.ruler);
+    this.setState({
+      characterDimensions: [
+        parseFloat(styles.width),
+        parseFloat(styles.height),
+      ]
+    });
   }
 
   componentWillUnMount() {
@@ -36,14 +43,17 @@ class App extends Component {
   }
 
   onMouseMove = (event) => {
-    console.log(Math.floor(event.pageX / 5));
+    const { characterDimensions } = this.state;
+    const line = Math.floor((this.state.scrollTop + event.clientY) / characterDimensions[1]);
+    const leftPadding = 16;
+    const col = Math.floor((event.pageX - this.list.offsetLeft - leftPadding) / characterDimensions[0]);
     this.setState({
-      activeLine: Math.floor((this.state.scrollTop + event.clientY) / LINE_HEIGHT),
+      active: [line, col],
     });
   }
 
   renderLine = ({ index, isScrolling, isVisible, key, style }) => {
-    const { lines, activeLine } = this.state;
+    const { lines, active } = this.state;
     const line = lines[index];
 
     return (
@@ -51,7 +61,7 @@ class App extends Component {
         key={key}
         style={style}
         className="App-line"
-        data-active={activeLine === index}
+        data-active={active[0] === index}
       >
         <pre>{line}</pre>
       </div>
@@ -59,20 +69,21 @@ class App extends Component {
   }
 
   render() {
-    const { lines } = this.state;
+    const { lines, characterDimensions } = this.state;
     return (
       <div className="App">
         <aside className="App-sidebar">
           <h1 className="App-title">{ /* Branch */ }</h1>
         </aside>
         <main className="App-main" ref={(el) => this.list = el}>
+          <pre className="App-char-ruler" ref={(el) => this.ruler = el}>x</pre>
           <AutoSizer>
             {({ width, height }) => (
               <List
                 height={height}
                 overscanRowCount={2}
                 rowCount={lines.length}
-                rowHeight={LINE_HEIGHT}
+                rowHeight={characterDimensions[1]}
                 rowRenderer={this.renderLine.bind(this)}
                 width={width}
                 onScroll={throttle(({ scrollTop }) => {

@@ -42,3 +42,10 @@
 .App-line pre {
   margin: 0;
 }
+
+.App-char-ruler {
+  visibility: hidden;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+}
