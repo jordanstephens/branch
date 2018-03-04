@@ -1,0 +1,63 @@
+.NodeTooltip-container {
+  position: absolute;
+  padding: 16px;
+}
+
+.NodeTooltip-content {
+  background: whitesmoke;
+  padding: 16px;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 0 0 0 4px hsla(0, 0%, 0%, 0.15);
+}
+
+.NodeTooltip-container.NodeTooltip-up {
+  transform: translate(-50%, 0%);
+}
+.NodeTooltip-container.NodeTooltip-down {
+  transform: translate(-50%, -100%);
+}
+
+.NodeTooltip-up .NodeTooltip-content:after,
+.NodeTooltip-down .NodeTooltip-content:after {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  transform: translate(-50%, 0);
+}
+
+.NodeTooltip-up .NodeTooltip-content:before,
+.NodeTooltip-down .NodeTooltip-content:before {
+  content: ' ';
+  position: absolute;
+  width: 0;
+  height: 0;
+  left: 50%;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  transform: translate(-50%, 0);
+}
+
+.NodeTooltip-up .NodeTooltip-content:after {
+  border-bottom: 8px solid whitesmoke;
+  top: -8px;
+}
+
+.NodeTooltip-down .NodeTooltip-content:after {
+  border-top: 8px solid whitesmoke;
+  bottom: -8px;
+}
+
+.NodeTooltip-up .NodeTooltip-content:before {
+  border-bottom: 10px solid hsla(0, 0%, 0%, 0.15);
+  top: -14px;
+}
+
+.NodeTooltip-down .NodeTooltip-content:before {
+  border-top: 10px solid hsla(0, 0%, 0%, 0.15);
+  bottom: -14px;
+}

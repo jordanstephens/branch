@@ -31,16 +31,23 @@
   width: 100%;
 }
 
-.App-line {
-  padding: 0 16px;
+.App-lineNumber {
+  flex-shrink: 0;
+  font-family: monospace;
+  width: 32px;
+  color: #888;
+  text-align: right;
 }
 
-.App-line[data-active='true'] {
-  background-color: #f8f8f8;
+.App-line {
+  display: flex;
+  flex-direction: row;
 }
 
 .App-line pre {
+  cursor: pointer;
   margin: 0;
+  padding: 0 16px;
 }
 
 .App-char-ruler {
@@ -48,4 +55,16 @@
   position: absolute;
   margin: 0;
   padding: 0;
+}
+
+.App-focusRect {
+  background: gold;
+  box-shadow: 0 0 0 2px gold;
+  border-radius: 4px;
+}
+
+.App-hoverRect {
+  background: lightblue;
+  box-shadow: 0 0 0 2px lightblue;
+  border-radius: 4px;
 }
