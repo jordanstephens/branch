@@ -2,11 +2,13 @@ import React, { Component } from 'react';
 
 import './NodeTooltip.css';
 
+import NodeInfo from './NodeInfo';
+
 class NodeTooltip extends Component {
   render() {
-    const { node, target, direction } = this.props;
+    const { path, target, direction, onChange, onDelete } = this.props;
 
-    if (!node) return null;
+    if (!path) return null;
 
     return (
       <div
@@ -19,7 +21,7 @@ class NodeTooltip extends Component {
         <div
           className="NodeTooltip-content"
         >
-          <strong>{node.type}</strong>
+          <NodeInfo path={path} onChange={onChange} onDelete={onDelete} />
         </div>
       </div>
     );

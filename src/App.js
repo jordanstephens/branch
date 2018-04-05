@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import * as esprima from 'esprima';
-import * as escodegen from 'escodegen';
-import { List, AutoSizer } from 'react-virtualized';
+import * as Babylon from 'babylon';
+import BabelGenerator from 'babel-generator';
 
+import transform from './transform';
 import AstMap from './lib/astMap';
 import throttle from './utils/throttle';
 import locRect from './utils/locRect';
@@ -12,6 +12,7 @@ import sample from './data/sample';
 import 'react-virtualized/styles.css'
 import './App.css';
 import NodeTooltip from './NodeTooltip';
+import EditorTextArea from './EditorTextArea';
 
 const SIDEBAR_WIDTH = 32;
 const GUTTER_WIDTH = 32;
@@ -22,33 +23,62 @@ function tooltipDirection(target) {
   return target < (window.innerHeight / 2) ? 'up' : 'down';
 }
 
+function parse(str) {
+  return Babylon.parse(str);
+}
+
+function generate(ast) {
+  return BabelGenerator(ast, { }).code;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
 
-    const messyAst = esprima.parse(sample);
-    const code = escodegen.generate(messyAst);
-    const cleanAst = esprima.parse(code, {
-      loc: true,
-    });
+    const messyAst = parse(sample);
+    const code = generate(messyAst);
+    const cleanAst = parse(code);
+    const astMap = new AstMap(cleanAst)
+    const lines = code.split('\n');
 
     this.state = {
       scrollTop: 0,
-      lines: code.split('\n'),
       active: [0, 0], // line, col
-      focusNodes: [],
+      focusPaths: [],
       ast: cleanAst,
-      astMap: new AstMap(cleanAst),
+      lines,
+      astMap,
       characterDimensions: [8, 16], // width, height
       hoverRect: null,
       focusRect: null,
+      modifiedAt: Date.now(),
     };
+  }
+
+  handleNodeChange = ({ type, path, opts }) => {
+    transform(type, path, opts);
+
+    const { ast } = this.state;
+    const code = generate(ast);
+    const newAst = parse(code);
+    const astMap = new AstMap(newAst);
+    const lines = code.split('\n');
+
+    this.setState({
+      ast: newAst,
+      lines,
+      astMap,
+      focusPaths: [],
+      focusRect: null,
+      modifiedAt: Date.now(),
+    });
   }
 
   componentDidMount() {
     this.list.addEventListener('mousemove', this.onMouseMove);
     const styles = window.getComputedStyle(this.ruler);
     this.setState({
+      modifiedAt: Date.now(),
       characterDimensions: [
         parseFloat(styles.width),
         parseFloat(styles.height),
@@ -60,12 +90,25 @@ class App extends Component {
     this.list.removeEventListener('mousemove', this.onMouseMove);
   }
 
+  mouseLineCol(event) {
+    const { characterDimensions } = this.state;
+    const line = Math.max(0, Math.floor(
+      (this.state.scrollTop + event.clientY) / characterDimensions[1]
+    ));
+    const col = Math.max(0, Math.floor(
+      (event.pageX - this.list.offsetLeft - LEFT_PADDING) / characterDimensions[0]
+    ));
+
+    return [line, col];
+  }
+
   onMouseMove = (event) => {
-    const { characterDimensions, astMap } = this.state;
-    const line = Math.max(0, Math.floor((this.state.scrollTop + event.clientY) / characterDimensions[1]));
-    const col = Math.max(0, Math.floor((event.pageX - this.list.offsetLeft - LEFT_PADDING) / characterDimensions[0]));
-    const nodes = astMap.find(line, col);
-    const rect = nodes.length ? locRect(nodes[0].loc) : null;
+    const { astMap } = this.state;
+    const [line, col] = this.mouseLineCol(event);
+    const paths = astMap.find(line, col);
+    if (!paths.length > 0) return;
+    const { type, node } = paths[0];
+    const rect = locRect(type, node.loc);
     this.setState({
       active: [line, col],
       hoverRect: rect,
@@ -75,10 +118,12 @@ class App extends Component {
   onClick = (event) => {
     const { active, astMap } = this.state;
     const [ line, col ] = active;
-    const nodes = astMap.find(line, col);
-    const rect = nodes.length ? locRect(nodes[0].loc) : null;
+    const paths = astMap.find(line, col);
+    if (!paths.length > 0) return;
+    const { type, node } = paths[0];
+    const rect = locRect(type, node.loc);
     this.setState({
-      focusNodes: nodes,
+      focusPaths: paths,
       focusRect: rect,
     });
   }
@@ -119,26 +164,10 @@ class App extends Component {
     }} />
   )
 
-  renderLine = ({ index, isScrolling, isVisible, key, style }) => {
-    const { lines } = this.state;
-    const line = lines[index];
-
-    return (
-      <div
-        key={key}
-        style={style}
-        className="App-line"
-      >
-        <div className="App-lineNumber">{index}</div>
-        <pre>{line}</pre>
-      </div>
-    )
-  }
-
   render() {
-    const { lines, characterDimensions, focusNodes, focusRect, hoverRect } = this.state;
-    const focusNode = focusNodes[0];
-    const nodeTooltipTarget = focusNode && this.rectTarget(focusRect);
+    const { characterDimensions, focusPaths, focusRect, hoverRect, lines, modifiedAt } = this.state;
+    const focusPath = focusPaths[0];
+    const nodeTooltipTarget = focusPath && this.rectTarget(focusRect);
 
     return (
       <div className="App">
@@ -157,25 +186,19 @@ class App extends Component {
           </pre>
           {hoverRect && this.renderRect({ className: "App-hoverRect", rect: hoverRect })}
           {focusRect && this.renderRect({ className: "App-focusRect", rect: focusRect })}
-          <AutoSizer>
-            {({ width, height }) => (
-              <List
-                height={height}
-                overscanRowCount={2}
-                rowCount={lines.length}
-                rowHeight={characterDimensions[1]}
-                rowRenderer={this.renderLine.bind(this)}
-                width={width}
-                onScroll={this.onScroll}
-              />
-            )}
-          </AutoSizer>
+          <EditorTextArea
+            lines={lines}
+            characterDimensions={characterDimensions}
+            modifiedAt={modifiedAt}
+            onScroll={this.onScroll}
+          />
         </main>
-        {focusNode ? (
+        {focusPath ? (
           <NodeTooltip
-            node={focusNode}
+            path={focusPath}
             target={nodeTooltipTarget}
             direction={tooltipDirection(nodeTooltipTarget[1])}
+            onChange={this.handleNodeChange.bind(this)}
           />
         ) : null}
       </div>

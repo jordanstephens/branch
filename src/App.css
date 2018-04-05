@@ -48,7 +48,11 @@
   cursor: pointer;
   margin: 0;
   padding: 0 16px;
+  width: 100%;
 }
+
+pre::-moz-selection { background: transparent; }
+pre::selection { background: transparent; }
 
 .App-char-ruler {
   visibility: hidden;
