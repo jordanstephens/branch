@@ -1,4 +1,18 @@
 export default `
+class Foo {
+  constructor() {
+    super();
+  }
+};
+
+for (var i = 0; i < 10; i++) {
+    console.log(i);
+}
+
+[].map((x) => {
+  return x + 1;
+});
+
 function swap(items, firstIndex, secondIndex){
     var temp = items[firstIndex];
     items[firstIndex] = items[secondIndex];

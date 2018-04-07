@@ -1,29 +1,29 @@
 import traverse from 'babel-traverse';
 import RTree from 'rtree';
-import locRect from '../utils/locRect';
 
-const MAX_COLUMN_WIDTH = 80;
+import { cursorRectsFromLoc } from './Cursor';
 
-function AstMap(ast) {
+function AstMap(ast, uiConfig) {
   this.tree = new RTree();
 
   traverse(ast, {
     enter: (path) => {
       const depth = path.getAncestry().length;
-      const rect = locRect(path.type, path.node.loc)
+      const rects = cursorRectsFromLoc(path.node.loc, uiConfig)
 
-      this.tree.insert(rect, {
-        path,
-        depth,
+      rects.forEach((rect) => {
+        this.tree.insert(rect, {
+          path,
+          depth,
+        });
       });
     },
   });
 }
 
-AstMap.prototype.find = function find(line, col) {
-  const rect = col
-    ? { x: col, y: line, h: 1, w: 1 }
-    : { x: 0, y: line, h: 1, w: MAX_COLUMN_WIDTH };
+AstMap.prototype.find = function find(position) {
+  const { line, col } = position;
+  const rect = { x: col, y: line, h: 1, w: 1 }
 
   return this.tree.search(rect)
     .sort((a, b) => b.depth - a.depth)

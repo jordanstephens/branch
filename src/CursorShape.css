@@ -1,0 +1,5 @@
+.CursorShape-rect:first-child:last-child { border-radius: 4px; }
+.CursorShape-rect:first-child { border-radius: 4px 4px 0 0; }
+.CursorShape-rect:last-child { border-radius: 0 0 4px 4px; }
+.CursorShape-rect[data-top-left-block='true'] { border-radius: 4px 0 0 0; }
+.CursorShape-rect[data-bottom-right-block='true'] { border-radius: 0 0 4px 0; }

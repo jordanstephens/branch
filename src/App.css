@@ -61,14 +61,12 @@ pre::selection { background: transparent; }
   padding: 0;
 }
 
-.App-focusRect {
+.App-focusCursor .CursorShape-rect {
   background: gold;
   box-shadow: 0 0 0 2px gold;
-  border-radius: 4px;
 }
 
-.App-hoverRect {
-  background: lightblue;
-  box-shadow: 0 0 0 2px lightblue;
-  border-radius: 4px;
+.App-hoverCursor .CursorShape-rect {
+  background: lightgray;
+  box-shadow: 0 0 0 2px lightgray;
 }

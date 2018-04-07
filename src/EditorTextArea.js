@@ -6,13 +6,14 @@ import './EditorTextArea.css';
 class EditorTextArea extends Component {
 
   shouldComponentUpdate(nextProps) {
-    return nextProps.modifiedAt !== this.props.modifiedAt;
+    return (nextProps.sourceCode.parsedAt !== this.props.sourceCode.parsedAt
+      || nextProps.rowHeight !== this.props.rowHeight);
   }
 
   renderLine = ({ index, isScrolling, isVisible, key, style }) => {
-    const { lines } = this.props;
+    const { sourceCode } = this.props;
     const lineNumber = index + 1;
-    const line = lines[index];
+    const line = sourceCode.lines[index];
 
     return (
       <div
@@ -27,7 +28,7 @@ class EditorTextArea extends Component {
   }
 
   render() {
-    const { characterDimensions, lines, onScroll } = this.props;
+    const { rowHeight, sourceCode, onScroll } = this.props;
 
     return (
       <AutoSizer>
@@ -35,8 +36,8 @@ class EditorTextArea extends Component {
           <List
             height={height}
             overscanRowCount={2}
-            rowCount={lines.length}
-            rowHeight={characterDimensions[1]}
+            rowCount={sourceCode.lines.length}
+            rowHeight={rowHeight}
             rowRenderer={this.renderLine.bind(this)}
             width={width}
             onScroll={onScroll}

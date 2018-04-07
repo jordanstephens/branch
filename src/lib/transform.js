@@ -1,3 +1,4 @@
+import traverse from 'babel-traverse';
 import * as BabelTypes from 'babel-types';
 
 export default function transform(type, path, opts = {}) {
@@ -23,6 +24,16 @@ export default function transform(type, path, opts = {}) {
       break;
 
     case 'DELETE_NODE':
+      let declarations = [];
+      console.log(path);
+      traverse(path.node, {
+        VariableDeclarator: (path) => {
+          declarations.push(path);
+        }
+      }, path.scope, null, path.parentPath);
+      declarations.forEach((declaration) => {
+        console.log(declaration, BabelTypes.isReferenced(declaration.node, declaration.parent));
+      });
       path.remove();
       break;
 
