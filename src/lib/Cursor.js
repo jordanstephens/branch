@@ -5,6 +5,7 @@ export function cursorFromPosition(position, astMap, uiConfig) {
   }
   const paths = astMap.find(position);
   if (!paths.length > 0) return null;
+  if (paths[0].type === 'Program') return null;
   return new Cursor(paths, uiConfig);
 }
 
