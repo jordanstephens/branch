@@ -79,7 +79,8 @@ class App extends Component {
   }
 
   onMouseMove = throttle((event) => {
-    const { sourceCode, uiConfig } = this.state;
+    const { sourceCode, uiConfig, focusCursor } = this.state;
+    if (focusCursor) return;
     const pointer = this.mousePosition(event);
     const hoverCursor = cursorFromPosition(pointer, sourceCode.astMap, uiConfig);
     this.setState({ hoverCursor });
