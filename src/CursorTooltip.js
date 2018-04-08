@@ -17,17 +17,22 @@ function tooltipDirection(target) {
   return target < (window.innerHeight / 2) ? TOOLTIP_DIRECTION.UP : TOOLTIP_DIRECTION.DOWN;
 }
 
-function rectTarget(rect, uiConfig) {
+function tooltipTarget(rect, uiConfig) {
   const targetX = uiConfig.sidebarWidth + uiConfig.leftPadding
     + pxWidthFromCharUnit(uiConfig, rect.x)
     + (0.5 * pxWidthFromCharUnit(uiConfig, rect.w));
-  const yPx = pxHeightFromCharUnit(uiConfig, rect.y);
-  const direction = tooltipDirection(yPx);
+  const topPx = pxHeightFromCharUnit(uiConfig, rect.y);
+  const bottomPx = pxHeightFromCharUnit(uiConfig, rect.y + rect.h);
+  const direction = tooltipDirection(topPx);
   const targetY = direction === TOOLTIP_DIRECTION.UP
-    ? yPx + pxHeightFromCharUnit(uiConfig, rect.h)
-    : yPx;
+    ? bottomPx
+    : topPx;
 
-  return [ targetX, targetY ];
+  const target = [targetX, targetY];
+  return {
+    target,
+    direction
+  };
 }
 
 class CursorTooltip extends Component {
@@ -43,8 +48,7 @@ class CursorTooltip extends Component {
 
     if (!cursor) return null;
 
-    const target = rectTarget(cursor.bbox, uiConfig);
-    const direction = tooltipDirection(target[1]);
+    const { target, direction } = tooltipTarget(cursor.bbox, uiConfig);
     const path = cursor.paths[0];
 
     return (
