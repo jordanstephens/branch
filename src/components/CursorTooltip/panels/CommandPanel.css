@@ -1,0 +1,27 @@
+.CommandPanel-list {
+  display: grid;
+  grid-template-columns: 80px 80px 80px;
+  grid-gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.CommandPanel-list button {
+  display: block;
+  width: 100%;
+  border: none;
+  background: hsla(0, 0%, 100%, 0.0);
+  color: #eee;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.CommandPanel-list button[disabled] {
+  color: #888;
+  cursor: default;
+}
+
+.CommandPanel-list button:not([disabled]):hover {
+  background: hsla(0, 0%, 100%, 0.1);
+}

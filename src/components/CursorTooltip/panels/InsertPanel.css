@@ -1,0 +1,22 @@
+.InsertPanel {
+  display: flex;
+  padding: 8px;
+}
+
+.InsertPanel input {
+  padding: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+.InsertPanel button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.InsertPanel-commit {
+  color: lightgreen;
+}
+.InsertPanel-cancel {
+  color: lightcoral;
+}

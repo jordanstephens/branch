@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 
-import NodeInfo from './NodeInfo';
+import CommandPanel from './panels/CommandPanel';
+import InsertPanel from './panels/InsertPanel';
 
-import * as pxUtils from './utils/pxFromCharUnit';
+import * as pxUtils from '../../utils/pxFromCharUnit';
+import MODE from '../../constants/modes';
 
 import './CursorTooltip.css';
 
@@ -35,19 +37,26 @@ function tooltipTarget(rect, uiConfig) {
   };
 }
 
+const MODE_PANEL = {
+  [MODE.NORMAL]: CommandPanel,
+  [MODE.RENAME]: InsertPanel,
+  [MODE.CHANGE]: InsertPanel,
+};
+
 class CursorTooltip extends Component {
   shouldComponentUpdate(nextProps) {
-    const cursor = this.props.cursor;
-    const nextCursor = nextProps.cursor;
+    const { cursor, mode } = this.props;
+    const { cursor: nextCursor, mode: nextMode } = nextProps;
 
-    return !(cursor && cursor.equals(nextCursor));
+    return !((cursor && cursor.equals(nextCursor)) && mode === nextMode);
   }
 
   render() {
-    const { cursor, uiConfig, onChange, onDelete } = this.props;
+    const { uiConfig, mode, cursor, onCommit, onModeChange } = this.props;
 
     if (!cursor) return null;
 
+    const Panel = MODE_PANEL[mode];
     const { target, direction } = tooltipTarget(cursor.bbox, uiConfig);
     const path = cursor.paths[0];
 
@@ -59,10 +68,13 @@ class CursorTooltip extends Component {
           left: target[0],
         }}
       >
-        <div
-          className="CursorTooltip-content"
-        >
-          <NodeInfo path={path} onChange={onChange} onDelete={onDelete} />
+        <div className="CursorTooltip-content">
+          <Panel
+            path={path}
+            mode={mode}
+            onCommit={onCommit}
+            onModeChange={onModeChange}
+          />
         </div>
       </div>
     );

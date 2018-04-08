@@ -4,7 +4,7 @@ import * as BabelTypes from 'babel-types';
 export default function transform(type, path, opts = {}) {
   switch(type) {
     case 'RENAME_IDENTIFIER':
-      path.scope.rename(path.node.name, opts.name)
+      path.scope.rename(path.node.name, opts.value)
       break;
 
     case 'CHANGE_NUMERICAL_LITERAL_VALUE':

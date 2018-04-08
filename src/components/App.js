@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 
-import transform from './lib/transform';
-import UIConfig, { detectUIProperties } from './lib/UIConfig';
-import { cursorFromPosition } from './lib/Cursor';
-import Position from './lib/Position';
-import SourceCode, { parse } from './lib/SourceCode';
+import transform from '../lib/transform';
+import UIConfig, { detectUIProperties } from '../lib/UIConfig';
+import { cursorFromPosition } from '../lib/Cursor';
+import Position from '../lib/Position';
+import SourceCode, { parse } from '../lib/SourceCode';
 
-import throttle from './utils/throttle';
+import throttle from '../utils/throttle';
+import MODE from '../constants/modes';
 
-import sample from './data/sample';
+import sample from '../data/sample';
 
 import CursorShape from './CursorShape';
 import CursorTooltip from './CursorTooltip';
@@ -38,21 +39,11 @@ class App extends Component {
     this.state = {
       scrollTop: 0,
       uiConfig,
+      mode: MODE.NORMAL,
       sourceCode: null,
       hoverCursor: null,
       focusCursor: null,
     };
-  }
-
-  handleNodeChange = ({ type, path, opts }) => {
-    transform(type, path, opts);
-
-    const { sourceCode, uiConfig } = this.state;
-
-    this.setState({
-      sourceCode: new SourceCode(sourceCode.ast, uiConfig),
-      focusCursor: null, // TODO: allow transform to set the next cursor
-    });
   }
 
   componentDidMount() {
@@ -72,9 +63,10 @@ class App extends Component {
   mousePosition(event) {
     const { pageX, clientY } = event;
     const { uiConfig, scrollTop } = this.state
-    const [ charWidth, charHeight ] = uiConfig.characterDimensions;
+    const { characterDimensions, leftPadding } = uiConfig;
+    const [ charWidth, charHeight ] = characterDimensions;
     const line = Math.max(0, Math.floor((scrollTop + clientY) / charHeight));
-    const col = Math.max(0, Math.floor((pageX - this.list.offsetLeft - uiConfig.leftPadding) / charWidth));
+    const col = Math.max(0, Math.floor((pageX - this.list.offsetLeft - leftPadding) / charWidth));
     return new Position(line, col);
   }
 
@@ -90,18 +82,45 @@ class App extends Component {
     const { sourceCode, uiConfig } = this.state;
     const pointer = this.mousePosition(event);
     const focusCursor = cursorFromPosition(pointer, sourceCode.astMap, uiConfig);
-    this.setState({ focusCursor });
+    this.setState({
+      focusCursor,
+      hoverCursor: null,
+      mode: MODE.NORMAL
+    });
   }
 
   onScroll = throttle(({ scrollTop }) => {
     this.setState({
       scrollTop,
-      hoverRect: null,
+      hoverCursor: null,
     });
   })
 
+  onCommit = ({ type, path, opts }) => {
+    transform(type, path, opts);
+
+    const { sourceCode, uiConfig } = this.state;
+
+    this.setState({
+      sourceCode: new SourceCode(sourceCode.ast, uiConfig),
+      focusCursor: null, // TODO: allow transform to set the next cursor and mode
+      mode: MODE.NORMAL,
+    });
+  }
+
+  onModeChange = (mode) => {
+    this.setState({ mode });
+  }
+
   render() {
-    const { uiConfig, sourceCode, scrollTop, hoverCursor, focusCursor } = this.state;
+    const {
+      uiConfig,
+      mode,
+      sourceCode,
+      scrollTop,
+      hoverCursor,
+      focusCursor
+    } = this.state;
 
     return (
       <div className="App">
@@ -139,7 +158,9 @@ class App extends Component {
         <CursorTooltip
           cursor={focusCursor}
           uiConfig={uiConfig}
-          onChange={this.handleNodeChange.bind(this)}
+          mode={mode}
+          onCommit={this.onCommit.bind(this)}
+          onModeChange={this.onModeChange.bind(this)}
         />
       </div>
     );

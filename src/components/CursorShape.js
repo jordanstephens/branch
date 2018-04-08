@@ -1,6 +1,6 @@
 import React from 'react';
 
-import * as pxUtils from './utils/pxFromCharUnit';
+import * as pxUtils from '../utils/pxFromCharUnit';
 
 import './CursorShape.css';
 
