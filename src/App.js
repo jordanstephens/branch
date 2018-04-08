@@ -40,7 +40,6 @@ class App extends Component {
 
     this.state = {
       scrollTop: 0,
-      pointer: new Position(0, 0), // line, col
       uiConfig,
       sourceCode,
       hoverCursor: null,
@@ -85,18 +84,14 @@ class App extends Component {
     const { sourceCode, uiConfig } = this.state;
     const pointer = this.mousePosition(event);
     const hoverCursor = cursorFromPosition(pointer, sourceCode.astMap, uiConfig);
-    this.setState({
-      hoverCursor,
-      pointer,
-    });
+    this.setState({ hoverCursor });
   }, 30)
 
   onClick = (event) => {
-    const { pointer, sourceCode, uiConfig } = this.state;
+    const { sourceCode, uiConfig } = this.state;
+    const pointer = this.mousePosition(event);
     const focusCursor = cursorFromPosition(pointer, sourceCode.astMap, uiConfig);
-    this.setState({
-      focusCursor,
-    });
+    this.setState({ focusCursor });
   }
 
   onScroll = throttle(({ scrollTop }) => {
