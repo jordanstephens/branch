@@ -6,7 +6,9 @@ import './EditorTextArea.css';
 class EditorTextArea extends Component {
 
   shouldComponentUpdate(nextProps) {
-    return (nextProps.sourceCode.parsedAt !== this.props.sourceCode.parsedAt
+    const { sourceCode } = this.props;
+    const { sourceCode: nextSourceCode } = nextProps;
+    return (!(sourceCode && nextSourceCode && nextProps.sourceCode.parsedAt === this.props.sourceCode.parsedAt)
       || nextProps.rowHeight !== this.props.rowHeight);
   }
 
@@ -29,6 +31,7 @@ class EditorTextArea extends Component {
 
   render() {
     const { rowHeight, sourceCode, onScroll } = this.props;
+    if (!sourceCode) return null;
 
     return (
       <AutoSizer>

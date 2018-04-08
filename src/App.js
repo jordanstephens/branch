@@ -26,7 +26,6 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    const messyAst = parse(sample);
     const uiConfig = new UIConfig({
       characterDimensions: [8, 16], // width, height
       sidebarWidth: SIDEBAR_WIDTH,
@@ -36,12 +35,10 @@ class App extends Component {
       maxLineLength: MAX_LINE_LENGTH,
     });
 
-    const sourceCode = new SourceCode(messyAst, uiConfig);
-
     this.state = {
       scrollTop: 0,
       uiConfig,
-      sourceCode,
+      sourceCode: null,
       hoverCursor: null,
       focusCursor: null,
     };
@@ -60,11 +57,12 @@ class App extends Component {
 
   componentDidMount() {
     this.list.addEventListener('mousemove', this.onMouseMove);
-    let { uiConfig, sourceCode } = this.state;
+    let { uiConfig } = this.state;
     uiConfig.update(detectUIProperties(this.ruler));
-    sourceCode.updateAstMap(uiConfig);
+    const messyAst = parse(sample);
+    const sourceCode = new SourceCode(messyAst, uiConfig);
 
-    this.setState({ uiConfig });
+    this.setState({ uiConfig, sourceCode });
   }
 
   componentWillUnMount() {
