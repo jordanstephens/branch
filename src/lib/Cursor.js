@@ -15,29 +15,35 @@ function CursorRectangle(x, y, width, height) {
   this.h = height;
 }
 
-function lineRect(lineNumber, start, end) {
-  return new CursorRectangle(start, lineNumber, end - start, 1);
-}
-
 export function cursorRectsFromLoc(loc, uiConfig) {
   const { start, end } = loc;
   const numLines = end.line - start.line + 1;
 
-  return new Array(numLines).fill(0).map((_x, i) => {
-    const lineNumber = start.line + i;
-    const colStart = i === 0 ? start.column : 0;
-    const colEnd = i === numLines - 1 ? end.column : uiConfig.maxLineLength;
-    return lineRect(lineNumber - 1, colStart, colEnd);
-  });
+  if (numLines === 1) {
+    return [
+      new CursorRectangle(start.column, start.line - 1, end.column - start.column, 1)
+    ];
+  } else if (numLines === 2) {
+    return [
+      new CursorRectangle(start.column, start.line - 1, uiConfig.maxLineLength - start.column, 1),
+      new CursorRectangle(0, end.line - 1, end.column, 1),
+    ];
+  } else {
+    return [
+      new CursorRectangle(start.column, start.line - 1, uiConfig.maxLineLength - start.column, 1),
+      new CursorRectangle(0, start.line, uiConfig.maxLineLength, numLines - 2),
+      new CursorRectangle(0, end.line - 1, end.column, 1),
+    ];
+  }
 }
 
-function unionRect(rects) {
+function bbox(rects) {
   return rects.reduce((memo, rect) => ({
     x: Math.min(memo.x, rect.x),
-    y: Math.max(memo.y, rect.y),
+    y: Math.min(memo.y, rect.y),
     w: Math.max(memo.w, rect.w),
-    h: Math.max(memo.h, rect.h),
-  }), { x: Number.POSITIVE_INFINITY, y: 0, w: 0, h: 0 });
+    h: memo.h + rect.h,
+  }), { x: Number.POSITIVE_INFINITY, y: Number.POSITIVE_INFINITY, w: 0, h: 0 });
 }
 
 export default function Cursor(paths, uiConfig) {
@@ -45,7 +51,7 @@ export default function Cursor(paths, uiConfig) {
   this.id = Math.random();
   this.paths = paths;
   this.rects = cursorRectsFromLoc(paths[0].node.loc, uiConfig);
-  this.bbox = unionRect(this.rects);
+  this.bbox = bbox(this.rects);
 }
 
 Cursor.prototype.equals = function(otherCursor) {
