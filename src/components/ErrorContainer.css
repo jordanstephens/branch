@@ -1,0 +1,9 @@
+.ErrorContainer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: hsl(6, 93%, 71%);
+  color: hsl(6, 40%, 16%);
+  padding: 1rem;
+}

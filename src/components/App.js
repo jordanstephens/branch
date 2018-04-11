@@ -14,6 +14,7 @@ import sample from '../data/sample';
 import CursorShape from './CursorShape';
 import CursorTooltip from './CursorTooltip';
 import EditorTextArea from './EditorTextArea';
+import ErrorContainer from './ErrorContainer';
 
 import 'react-virtualized/styles.css'
 import './App.css';
@@ -43,6 +44,7 @@ class App extends Component {
       sourceCode: null,
       hoverCursor: null,
       focusCursor: null,
+      error: null,
     };
   }
 
@@ -97,14 +99,28 @@ class App extends Component {
   })
 
   onCommit = ({ type, path, opts }) => {
-    transform(type, path, opts);
+    let transformError;
+    try {
+      transform(type, path, opts);
+    } catch(error) {
+      transformError = error;
+    }
+
 
     const { sourceCode, uiConfig } = this.state;
 
     this.setState({
       sourceCode: new SourceCode(sourceCode.ast, uiConfig),
-      focusCursor: null, // TODO: allow transform to set the next cursor and mode
+      // TODO: allow transform to set the next cursor and mode
+      focusCursor: null,
       mode: MODE.NORMAL,
+      error: transformError,
+    }, () => {
+      if (this.state.error) {
+        window.setTimeout(() => {
+          this.setState({ error: null });
+        }, 15000);
+      }
     });
   }
 
@@ -119,7 +135,8 @@ class App extends Component {
       sourceCode,
       scrollTop,
       hoverCursor,
-      focusCursor
+      focusCursor,
+      error
     } = this.state;
 
     return (
@@ -154,6 +171,7 @@ class App extends Component {
             rowHeight={uiConfig.characterDimensions[1]}
             onScroll={this.onScroll}
           />
+          <ErrorContainer error={error} />
         </main>
         <CursorTooltip
           cursor={focusCursor}
