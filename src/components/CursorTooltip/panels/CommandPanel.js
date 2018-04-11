@@ -55,9 +55,10 @@ function optionEnabled(key, path) {
 
 class CommandPanel extends Component {
   deleteNode = () => {
+    const { path } = this.props;
     this.props.onCommit({
       type: 'DELETE_NODE',
-      path: this.props.path,
+      path,
       opts: {},
     });
   }
