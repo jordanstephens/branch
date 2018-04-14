@@ -177,6 +177,7 @@ class App extends Component {
           cursor={focusCursor}
           uiConfig={uiConfig}
           mode={mode}
+          scrollTop={scrollTop}
           onCommit={this.onCommit.bind(this)}
           onModeChange={this.onModeChange.bind(this)}
         />

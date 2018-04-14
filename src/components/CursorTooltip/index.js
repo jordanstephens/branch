@@ -19,7 +19,7 @@ function tooltipDirection(target) {
   return target < (window.innerHeight / 2) ? TOOLTIP_DIRECTION.UP : TOOLTIP_DIRECTION.DOWN;
 }
 
-function tooltipTarget(rect, uiConfig) {
+function tooltipTarget(rect, uiConfig, scrollTop = 0) {
   const targetX = uiConfig.sidebarWidth + uiConfig.leftPadding
     + pxWidthFromCharUnit(uiConfig, rect.x)
     + (0.5 * pxWidthFromCharUnit(uiConfig, rect.w));
@@ -30,7 +30,7 @@ function tooltipTarget(rect, uiConfig) {
     ? bottomPx
     : topPx;
 
-  const target = [targetX, targetY];
+  const target = [targetX, targetY - scrollTop];
   return {
     target,
     direction
@@ -45,19 +45,23 @@ const MODE_PANEL = {
 
 class CursorTooltip extends Component {
   shouldComponentUpdate(nextProps) {
-    const { cursor, mode } = this.props;
-    const { cursor: nextCursor, mode: nextMode } = nextProps;
+    const { cursor, mode, scrollTop } = this.props;
+    const {
+      cursor: nextCursor,
+      mode: nextMode,
+      scrollTop: nextScrollTop
+    } = nextProps;
 
-    return !((cursor && cursor.equals(nextCursor)) && mode === nextMode);
+    return !((cursor && cursor.equals(nextCursor)) && mode === nextMode && scrollTop === nextScrollTop);
   }
 
   render() {
-    const { uiConfig, mode, cursor, onCommit, onModeChange } = this.props;
+    const { uiConfig, mode, cursor, scrollTop, onCommit, onModeChange } = this.props;
 
     if (!cursor) return null;
 
     const Panel = MODE_PANEL[mode];
-    const { target, direction } = tooltipTarget(cursor.bbox, uiConfig);
+    const { target, direction } = tooltipTarget(cursor.bbox, uiConfig, scrollTop);
     const path = cursor.paths[0];
 
     return (
