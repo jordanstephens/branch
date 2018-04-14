@@ -34,6 +34,17 @@ class InsertPanel extends Component {
     this.input.focus();
     this.input.selectionStart = 0;
     this.input.selectionEnd = this.state.value.length;
+    document.addEventListener('keydown', this.onDocumentKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.onDocumentKeyDown);
+  }
+
+  onDocumentKeyDown = (event) => {
+    if (event.keyCode === KEY_CODES.ESCAPE) {
+      this.props.onModeChange(MODE.NORMAL);
+    }
   }
 
   onChange = (event) => {
